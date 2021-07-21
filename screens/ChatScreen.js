@@ -12,7 +12,11 @@ export default function ChatScreen({ route }) {
       .doc(route.params.chatid)
       .onSnapshot((snapshot) => {
         console.log("New Snapshot!");
-        setMessages(snapshot.data().messages);
+        let newMessages = snapshot.data().messages.map((singleMessage) => {
+          singleMessage.createdAt = singleMessage.createdAt.seconds * 1000;
+          return singleMessage;
+        });
+        setMessages(newMessages);
       });
 
     return function cleanupBeforeUnmounting() {
@@ -39,10 +43,10 @@ export default function ChatScreen({ route }) {
       user={{
         // current "blue bubble" user
         _id: "1",
-        name: "Ashwin",
-        avatar: "https://placeimg.com/140/140/any",
+        name: "Sam",
+        avatar: "https://i.pinimg.com/originals/74/fc/ce/74fccefb448a7642ca3d2885fdf7a7b5.jpg",
       }}
-      inverted={true}
+      inverted={false}
       showUserAvatar={true}
       renderUsernameOnMessage={true}
     />
