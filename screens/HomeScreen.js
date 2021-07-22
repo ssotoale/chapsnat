@@ -7,31 +7,41 @@ import {
   StyleSheet,
 } from "react-native";
 import db from "../firebase";
+import firebase from "@firebase/app";
 
 export default function HomeScreen({ navigation }) {
   const [chatList, setChatList] = useState([]);
 
   useEffect(() => {
     let chatsRef = db.collection("Chats");
-    chatsRef.get().then((querySnapshot) => {
+    let query = chatsRef.where(
+      "users",
+      "array-contains",
+      firebase.auth().currentUser.uid
+    );
+    // Venus fix
+    let unsubscribeFromNewSnapshots = query.onSnapshot((querySnapshot) => {
       let newChatList = [];
       querySnapshot.forEach((doc) => {
         let newChat = { ...doc.data() };
         newChat.id = doc.id;
         newChatList.push(newChat);
-        console.log(newChatList);
       });
       setChatList(newChatList);
     });
+
+    return function cleanupBeforeUnmounting() {
+      unsubscribeFromNewSnapshots();
+    };
   }, []);
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
         data={chatList}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate("Chat", { chatid: item.id })}
+            onPress={() => navigation.navigate("Chat", { chatname: item.id })}
           >
             <Text style={styles.item}>{item.id}</Text>
           </TouchableOpacity>
